@@ -71,6 +71,14 @@ class EvolverServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->_evolverService->canEvolve($this->_monster));
     }
 
+    public function testCanEvolve_WhenMonsterHasPotentialEvolution_AndRequirementsNotMet_ThenCannotEvolve()
+    {
+        $this->_mockFindEvolutions(array('evolvedMonster'));
+        $this->_mockRequirement(false);
+        $this->_mockFindRequirements('evolvedMonster', array($this->_requirement));
+        $this->assertFalse($this->_evolverService->canEvolve($this->_monster));
+    }
+
     /**
      * @param array $returnValue
      */

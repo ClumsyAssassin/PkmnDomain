@@ -8,6 +8,11 @@ use Pkmn\Monster\Domain\Monster;
 
 class EvolverService implements Evolver
 {
+    /**
+     * @var EvolutionRepository
+     */
+    private $_evolutionRepository;
+
     public function __construct(EvolutionRepository $evolutionRepository)
     {
         $this->_evolutionRepository = $evolutionRepository;
@@ -30,44 +35,41 @@ class EvolverService implements Evolver
         if (is_string($monsterNameToEvolveInto) && !empty($monsterNameToEvolveInto)) {
             if (!in_array($monsterNameToEvolveInto, $evolutions)) {
                 return false;
-            } else {
-                $requirements = $this->_evolutionRepository->findRequirements($monsterNameToEvolveInto);
-                if(empty($requirements)) {
-                    throw new NoRequirementsFound("No requirements found for monster '$monsterNameToEvolveInto'");
-                }
-                $requirementsMet = true;
-                /**
-                 * @var \Pkmn\Evolution\Domain\Requirement $requirement
-                 */
-                foreach ($requirements as $requirement) {
-                    if (!$requirement->hasBeenMet($monster)) {
-                        $requirementsMet = false;
-                        break;
-                    }
-                }
-                return $requirementsMet;
             }
-        } else {
-            // Fetch for all guys
-            foreach ($evolutions as $evolution) {
-                $requirements = $this->_evolutionRepository->findRequirements($evolution);
-                if(empty($requirements)) {
-                    throw new NoRequirementsFound("No requirements found for monster '$evolution'");
-                }
-                $requirementsMet = true;
-                /**
-                 * @var \Pkmn\Evolution\Domain\Requirement $requirement
-                 */
-                foreach ($requirements as $requirement) {
-                    if (!$requirement->hasBeenMet($monster)) {
-                        $requirementsMet = false;
-                        break;
-                    }
-                }
-                return $requirementsMet;
-            }
+            return $this->_monsterMetRequirementsForEvolution($monster, $monsterNameToEvolveInto);
+
         }
 
-        return true;
+        foreach ($evolutions as $evolution) {
+            if ($this->_monsterMetRequirementsForEvolution($monster, $evolution)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param Monster $monster
+     * @param $monsterNameToEvolveInto
+     * @return bool
+     * @throws \Pkmn\Evolution\Domain\Exception\NoRequirementsFound
+     */
+    private function _monsterMetRequirementsForEvolution(Monster $monster, $monsterNameToEvolveInto)
+    {
+        $requirements = $this->_evolutionRepository->findRequirements($monsterNameToEvolveInto);
+        if (empty($requirements)) {
+            throw new NoRequirementsFound("No requirements found for monster '$monsterNameToEvolveInto'");
+        }
+        $requirementsMet = true;
+        /**
+         * @var \Pkmn\Evolution\Domain\Requirement $requirement
+         */
+        foreach ($requirements as $requirement) {
+            if (!$requirement->hasBeenMet($monster)) {
+                $requirementsMet = false;
+                break;
+            }
+        }
+        return $requirementsMet;
     }
 } 
