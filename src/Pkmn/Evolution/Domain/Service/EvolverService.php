@@ -33,11 +33,8 @@ class EvolverService implements Evolver
         }
 
         if (is_string($monsterNameToEvolveInto) && !empty($monsterNameToEvolveInto)) {
-            if (!in_array($monsterNameToEvolveInto, $evolutions)) {
-                return false;
-            }
-            return $this->_monsterMetRequirementsForEvolution($monster, $monsterNameToEvolveInto);
-
+            return (!in_array($monsterNameToEvolveInto, $evolutions))
+                ? false : $this->_monsterMetRequirementsForEvolution($monster, $monsterNameToEvolveInto);
         }
 
         foreach ($evolutions as $evolution) {
@@ -56,11 +53,12 @@ class EvolverService implements Evolver
      */
     private function _monsterMetRequirementsForEvolution(Monster $monster, $monsterNameToEvolveInto)
     {
+        $requirementsMet = true;
         $requirements = $this->_evolutionRepository->findRequirements($monsterNameToEvolveInto);
         if (empty($requirements)) {
             throw new NoRequirementsFound("No requirements found for monster '$monsterNameToEvolveInto'");
         }
-        $requirementsMet = true;
+
         /**
          * @var \Pkmn\Evolution\Domain\Requirement $requirement
          */
