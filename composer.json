@@ -1,0 +1,14 @@
+{
+    "name": "ClumsyAssassin/PkmnDomain",
+    "autoload": {
+        "psr-0": {
+            "Pkmn\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=5.5.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*"
+    }
+}
