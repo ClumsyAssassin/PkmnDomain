@@ -16,6 +16,7 @@ class EvolverService implements Evolver
     /**
      * @param Monster $monster Name of the monster to evolve
      * @param string|null $monsterNameToEvolveInto (optional) The name of the monster to evolve into
+     * @throws \Pkmn\Evolution\Domain\Exception\NoRequirementsFound
      * @return boolean
      */
     public function canEvolve(Monster $monster, $monsterNameToEvolveInto = null)
