@@ -19,6 +19,12 @@ class EvolverService implements Evolver
      */
     public function canEvolve(Monster $monster, $monsterNameToEvolveInto = null)
     {
+        $evolutions = $this->_evolutionRepository->findEvolutions($monster->getName());
+
+        if(empty($evolutions)) {
+            return false;
+        }
+
         return true;
     }
 } 
