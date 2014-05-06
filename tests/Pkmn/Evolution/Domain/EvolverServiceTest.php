@@ -12,11 +12,6 @@ class EvolverServiceTest extends \PHPUnit_Framework_TestCase
     private $_monster;
 
     /**
-     * @var \Pkmn\Evolution\Domain\Requirement
-     */
-    private $_requirement;
-
-    /**
      * @var EvolverService
      */
     private $_evolverService;
@@ -30,7 +25,6 @@ class EvolverServiceTest extends \PHPUnit_Framework_TestCase
     {
         $this->_monster = $this->getMockForAbstractClass('\Pkmn\Monster\Domain\Monster');
         $this->_monster->setName('monster');
-        $this->_requirement = $this->getMock('\Pkmn\Evolution\Domain\Requirement');
         $this->_evolutionRepository = $this->getMock('\Pkmn\Evolution\Domain\Repository\EvolutionRepository');
         $this->_evolverService = new EvolverService($this->_evolutionRepository);
     }
@@ -38,8 +32,7 @@ class EvolverServiceTest extends \PHPUnit_Framework_TestCase
     public function testCanEvolve_WhenMonsterHasPotentialEvolution_AndRequirementsMet_ThenCanEvolve()
     {
         $this->_mockFindEvolutions(array('evolvedMonster'));
-        $this->_mockRequirement(true);
-        $this->_mockFindRequirements('evolvedMonster', array($this->_requirement));
+        $this->_mockFindRequirements('evolvedMonster', array($this->_getMockRequirement(true)));
         $this->assertTrue($this->_evolverService->canEvolve($this->_monster));
     }
 
@@ -58,8 +51,7 @@ class EvolverServiceTest extends \PHPUnit_Framework_TestCase
     public function testCanEvolve_WhenDesiredEvolutionIsAPotentialEvolution_AndRequirementsMet_ThenCanEvolve()
     {
         $this->_mockFindEvolutions(array('evolvedMonster'));
-        $this->_mockRequirement(true);
-        $this->_mockFindRequirements('evolvedMonster', array($this->_requirement));
+        $this->_mockFindRequirements('evolvedMonster', array($this->_getMockRequirement(true)));
         $this->assertTrue($this->_evolverService->canEvolve($this->_monster, 'evolvedMonster'));
     }
 
@@ -74,9 +66,18 @@ class EvolverServiceTest extends \PHPUnit_Framework_TestCase
     public function testCanEvolve_WhenMonsterHasPotentialEvolution_AndRequirementsNotMet_ThenCannotEvolve()
     {
         $this->_mockFindEvolutions(array('evolvedMonster'));
-        $this->_mockRequirement(false);
-        $this->_mockFindRequirements('evolvedMonster', array($this->_requirement));
+        $this->_mockFindRequirements('evolvedMonster', array($this->_getMockRequirement(false)));
         $this->assertFalse($this->_evolverService->canEvolve($this->_monster));
+    }
+
+    public function testCanEvolve_WhenDesiredEvolutionIsAPotentialEvolution_AndARequirementsMet_ThenCannotEvolve()
+    {
+        $this->_mockFindEvolutions(array('evolvedMonster'));
+        $this->_mockFindRequirements('evolvedMonster', array(
+            $this->_getMockRequirement(true),
+            $this->_getMockRequirement(false)
+        ));
+        $this->assertFalse($this->_evolverService->canEvolve($this->_monster, 'evolvedMonster'));
     }
 
     /**
@@ -104,12 +105,15 @@ class EvolverServiceTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @param boolean $rtnValue
+     * @return \Pkmn\Evolution\Domain\Requirement
      */
-    private function _mockRequirement($rtnValue)
+    private function _getMockRequirement($rtnValue)
     {
-        $this->_requirement->expects($this->once())
+        $requirement = $this->getMock('\Pkmn\Evolution\Domain\Requirement');
+        $requirement->expects($this->once())
             ->method('hasBeenMet')
             ->with($this->_monster)
             ->will($this->returnValue($rtnValue));
+        return $requirement;
     }
 }
